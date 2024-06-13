@@ -163,13 +163,13 @@ pub(crate) trait GenerateW: Api {
 
 pub(crate) trait Test: Api + GenerateW {
     /// ### 测试
-    fn test(&mut self, url: &str) {
+    fn test(&mut self, url: &str) -> Result<String> {
         let rt = "82253e788a7b95e9";
-        let (gt, challenge) = self.register_test(url).unwrap();
-        let (_, _) = self.get_c_s(gt.as_str(), challenge.as_str(), None).unwrap();
-        let _ = self.get_type(gt.as_str(), challenge.as_str(), None);
-        let (c, s, args) = self.get_new_c_s_args(gt.as_str(), challenge.as_str()).unwrap();
-        let key = self.calculate_key(args).unwrap();
+        let (gt, challenge) = self.register_test(url)?;
+        let (_, _) = self.get_c_s(gt.as_str(), challenge.as_str(), None)?;
+        let _ = self.get_type(gt.as_str(), challenge.as_str(), None)?;
+        let (c, s, args) = self.get_new_c_s_args(gt.as_str(), challenge.as_str())?;
+        let key = self.calculate_key(args)?;
         let w = self.generate_w(
             key.as_str(),
             gt.as_str(),
@@ -177,9 +177,9 @@ pub(crate) trait Test: Api + GenerateW {
             serde_json::to_string(&c).unwrap().as_str(),
             s.as_str(),
             rt,
-        ).unwrap();
+        )?;
         sleep(Duration::new(2, 0));
-        let res = self.verify(gt.as_str(), challenge.as_str(), Option::from(w.as_str())).unwrap();
-        println!("{:?}", res);
+        let (_, validate) = self.verify(gt.as_str(), challenge.as_str(), Option::from(w.as_str()))?;
+        Ok(validate)
     }
 }
