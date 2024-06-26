@@ -302,9 +302,11 @@ impl GenerateW for Click<'_> {
         c: &str,
         s: &str,
         rt: &str,
-    ) -> Result<String> {
-        let click_w: Function = MiniV8::new().eval(include_str!("../js/click.js")).map_err(|_| other_without_source("js运行时创建失败"))?;
-        click_w.call((key, gt, challenge, c, s, rt)).map_err(|_| other_without_source("js运行时出错"))
+    ) -> Result<String> {        
+        let url = format!("http://127.0.0.1:3000/click?positions={}&gt={}&challenge={}&c={}&s={}&rt={}", key, gt, challenge, c, s, rt);
+        let res = self.client.get(url).send().map_err(net_work_error)?;
+        let res = res.text().map_err(|e| other("什么b玩意错误", e))?;
+        Ok(res)
     }
 }
 

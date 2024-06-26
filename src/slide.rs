@@ -197,8 +197,10 @@ impl GenerateW for Slide {
         s: &str,
         rt: &str,
     ) -> Result<String> {
-        let slide_w: Function = MiniV8::new().eval(include_str!("../js/slide.js")).map_err(|_| other_without_source("js运行时创建失败"))?;
-        slide_w.call((key, gt, challenge, c, s, rt)).map_err(|_| other_without_source("js运行时出错"))
+        let url = format!("http://127.0.0.1:3000/slide?gt={}&challenge={}&c={}&s={}&rt={}&dis={}", gt, challenge, c, s, rt, key);
+        let res = self.client.get(url).send().map_err(net_work_error)?;
+        let res = res.text().map_err(|e| other("什么b玩意错误", e))?;
+        Ok(res)
     }
 }
 
